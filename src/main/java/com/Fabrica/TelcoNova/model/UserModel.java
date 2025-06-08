@@ -42,15 +42,14 @@ public class UserModel {
     @OneToMany(mappedBy = "user")
     private Set<UserGroupModel> groups = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
-    private Set<UserNotificationModel> notifications = new HashSet<>();
+   
 
     public UserModel(){
             
     }
     
     public UserModel(Long id, String name, String email, String phone, RoleModel role, String address,
-        LocalDateTime createdAt, Set<UserGroupModel> groups, Set<UserNotificationModel> notifications) {
+        LocalDateTime createdAt, Set<UserGroupModel> groups) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -59,7 +58,6 @@ public class UserModel {
         this.address = address;
         this.createdAt = createdAt;
         this.groups = groups;
-        this.notifications = notifications;
     }
 
     public Long getId() {
@@ -124,14 +122,6 @@ public class UserModel {
 
     public void setGroups(Set<UserGroupModel> groups) {
         this.groups = groups;
-    }
-
-    public Set<UserNotificationModel> getNotifications() {
-        return notifications;
-    }
-
-    public void setNotifications(Set<UserNotificationModel> notifications) {
-        this.notifications = notifications;
     }
 
     

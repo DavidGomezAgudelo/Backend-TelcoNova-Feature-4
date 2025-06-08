@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL API Tester - Editor Integrado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .endpoint-info {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .endpoint-info i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .endpoint-url {
+            font-family: monospace;
+            background-color: #f1f5f9;
+            padding: 5px 10px;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .tests-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        .tests-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        .tests-list h2 {
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            margin: 0;
+        }
+        
+        .tests-scroll {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .test-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .test-item.active {
+            background-color: #e0e7ff;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .test-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .test-item .query-type {
+            font-size: 0.8rem;
+            background-color: #e0e7ff;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        
+        .results-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+        
+        .results-header {
+            padding: 1rem;
+            background-color: #f1f5f9;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #e5e7eb;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .results-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 15px;
+        }
+        
+        .editor-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .editor-section h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .editor {
+            flex: 1;
+            font-family: monospace;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            resize: none;
+            background-color: #1e293b;
+            color: #f1f5f9;
+            white-space: pre;
+            overflow: auto;
+        }
+        
+        .editor-variables {
+            height: 150px;
+        }
+        
+        .test-result {
+            margin-bottom: 1.5rem;
+        }
+        
+        .test-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: #dcfce7;
+            color: var(--success);
+        }
+        
+        .status-error {
+            background-color: #fee2e2;
+            color: var(--error);
+        }
+        
+        .query-display {
+            background-color: #1e293b;
+            color: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .result-display {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .progress-container {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .test-summary {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .summary-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .summary-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .summary-card p {
+            color: var(--gray);
+        }
+        
+        .success-card {
+            border-top: 4px solid var(--success);
+        }
+        
+        .warning-card {
+            border-top: 4px solid var(--warning);
+        }
+        
+        .error-card {
+            border-top: 4px solid var(--error);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        .custom-query-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .tests-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-summary {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-bug"></i> GraphQL API Tester - Editor Integrado</h1>
+            <p>Prueba, edita y ejecuta consultas GraphQL directamente desde tu navegador</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="endpoint-info">
+            <i class="fas fa-server"></i>
+            <div class="endpoint-url">http://localhost:8080/graphql</div>
+        </div>
+        
+        <div class="controls">
+            <button id="runAllBtn" class="btn btn-primary">
+                <i class="fas fa-play-circle"></i> Ejecutar todas las pruebas
+            </button>
+            <button id="runSelectedBtn" class="btn btn-secondary">
+                <i class="fas fa-play"></i> Ejecutar seleccionadas
+            </button>
+            <button id="clearResultsBtn" class="btn btn-outline">
+                <i class="fas fa-trash-alt"></i> Limpiar resultados
+            </button>
+            <button id="saveQueryBtn" class="btn btn-warning">
+                <i class="fas fa-save"></i> Guardar consulta personalizada
+            </button>
+        </div>
+        
+        <div class="tests-container">
+            <div class="tests-list">
+                <h2><i class="fas fa-list"></i> Métodos Disponibles</h2>
+                <div class="tests-scroll" id="testsList">
+                    <!-- Tests will be populated here by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="results-container">
+                <div class="results-header">
+                    <h2><i class="fas fa-clipboard-list"></i> Editor GraphQL</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-tab="editor">Editor</div>
+                        <div class="tab" data-tab="results">Resultados</div>
+                    </div>
+                </div>
+                <div class="results-content" id="resultsContent">
+                    <!-- Editor View -->
+                    <div id="editorView">
+                        <div class="editor-container">
+                            <div class="editor-section">
+                                <h3><i class="fas fa-code"></i> Consulta GraphQL</h3>
+                                <textarea id="queryEditor" class="editor" spellcheck="false">
+{
+  getAlerts {
+    id
+    title
+    active
+    createdAt
+  }
+}</textarea>
+                            </div>
+                            
+                            <div class="editor-section">
+                                <h3><i class="fas fa-sliders-h"></i> Variables (JSON)</h3>
+                                <textarea id="variablesEditor" class="editor editor-variables" spellcheck="false">
+{
+  // "id": "1",
+  // "input": { ... }
+}</textarea>
+                            </div>
+                            
+                            <div class="custom-query-controls">
+                                <button id="runCustomQueryBtn" class="btn btn-primary">
+                                    <i class="fas fa-play"></i> Ejecutar Consulta
+                                </button>
+                                <button id="clearEditorBtn" class="btn btn-outline">
+                                    <i class="fas fa-eraser"></i> Limpiar Editor
+                                </button>
+                                <button id="formatQueryBtn" class="btn btn-outline">
+                                    <i class="fas fa-align-left"></i> Formatear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results View -->
+                    <div id="resultsView" class="hidden">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No hay resultados aún</h3>
+                            <p>Ejecuta algunas pruebas para ver los resultados aquí</p>
+                        </div>
+                        <!-- Results will be populated here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-summary">
+            <div class="summary-card success-card">
+                <h3 id="successCount">0</h3>
+                <p>Pruebas exitosas</p>
+            </div>
+            <div class="summary-card warning-card">
+                <h3 id="warningCount">0</h3>
+                <p>Pruebas con advertencias</p>
+            </div>
+            <div class="summary-card error-card">
+                <h3 id="errorCount">0</h3>
+                <p>Pruebas fallidas</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Endpoint configuration
+        const endpoint = "http://localhost:8080/graphql";
+        
+        // Test definitions
+        const tests = [
+            // Queries
+            {
+                name: "getRoles",
+                type: "query",
+                query: `{ getRoles { id name } }`,
+                description: "Obtener todos los roles"
+            },
+            {
+                name: "getAllGroups",
+                type: "query",
+                query: `{ getAllGroups { id name } }`,
+                description: "Obtener todos los grupos"
+            },
+            {
+                name: "getEvents",
+                type: "query",
+                query: `{ getEvents { id eventDate description eventType { name } } }`,
+                description: "Obtener todos los eventos"
+            },
+            {
+                name: "getAlerts",
+                type: "query",
+                query: `{ getAlerts { id title active createdAt } }`,
+                description: "Obtener todas las alertas"
+            },
+            {
+                name: "getAllGroupsWithUsers",
+                type: "query",
+                query: `{ getAllGroupsWithUsers { id name users { id name } } }`,
+                description: "Obtener grupos con usuarios"
+            },
+            {
+                name: "getUser",
+                type: "query",
+                query: `query GetUser($id: ID!) { getUser(id: $id) { id name email } }`,
+                variables: { id: "1" }, // ID de ejemplo
+                description: "Obtener un usuario por ID"
+            },
+            {
+                name: "getAlertById",
+                type: "query",
+                query: `query GetAlert($id: ID!) { getAlertById(id: $id) { id title active } }`,
+                variables: { id: "1" }, // ID de ejemplo
+                description: "Obtener alerta por ID"
+            },
+            {
+                name: "getGroupById",
+                type: "query",
+                query: `query GetGroup($id: ID!) { getGroupById(id: $id) { id name } }`,
+                variables: { id: "1" }, // ID de ejemplo
+                description: "Obtener grupo por ID"
+            },
+            
+            // Mutations
+            {
+                name: "createRole",
+                type: "mutation",
+                query: `mutation CreateRole($name: String!) { 
+                    createRole(name: $name) { id name } 
+                }`,
+                variables: { name: "Nuevo Rol" },
+                description: "Crear un nuevo rol"
+            },
+            {
+                name: "createUser",
+                type: "mutation",
+                query: `mutation CreateUser($input: CreateUserInput!) {
+                    createUser(input: $input) { id name email }
+                }`,
+                variables: { 
+                    input: {
+                        name: "Nuevo Usuario",
+                        email: "nuevo@ejemplo.com",
+                        phone: "123456789",
+                        roleId: "1",
+                        address: "Calle Ejemplo 123"
+                    }
+                },
+                description: "Crear un nuevo usuario"
+            },
+            {
+                name: "createAlert",
+                type: "mutation",
+                query: `mutation CreateAlert($input: CreateAlertInput!) {
+                    createAlert(input: $input) { id title active }
+                }`,
+                variables: { 
+                    input: {
+                        title: "Nueva Alerta",
+                        description: "Descripción de la alerta",
+                        priority: 1,
+                        category: "Test",
+                        eventId: "1",
+                        active: true
+                    }
+                },
+                description: "Crear una nueva alerta"
+            },
+            {
+                name: "updateAlert",
+                type: "mutation",
+                query: `mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!) {
+                    updateAlert(id: $id, input: $input)
+                }`,
+                variables: { 
+                    id: "1",
+                    input: {
+                        title: "Alerta Actualizada",
+                        description: "Descripción actualizada",
+                        priority: 2,
+                        category: "Actualizado",
+                        active: false
+                    }
+                },
+                description: "Actualizar una alerta"
+            },
+            {
+                name: "deleteAlert",
+                type: "mutation",
+                query: `mutation DeleteAlert($id: ID!) {
+                    deleteAlert(id: $id)
+                }`,
+                variables: { id: "1" },
+                description: "Eliminar una alerta"
+            },
+            {
+                name: "createGroup",
+                type: "mutation",
+                query: `mutation CreateGroup($input: CreateGroupInput!) {
+                    createGroup(input: $input) { id name }
+                }`,
+                variables: { 
+                    input: {
+                        name: "Nuevo Grupo",
+                        users: ["1", "2"] // IDs de ejemplo
+                    }
+                },
+                description: "Crear un nuevo grupo"
+            },
+            {
+                name: "addUserToGroup",
+                type: "mutation",
+                query: `mutation AddUserToGroup($groupId: ID!, $userId: ID!) {
+                    addUserToGroup(groupId: $groupId, userId: $userId) { id name }
+                }`,
+                variables: { 
+                    groupId: "1",
+                    userId: "3"
+                },
+                description: "Añadir usuario a grupo"
+            },
+            {
+                name: "createEvent",
+                type: "mutation",
+                query: `mutation CreateEvent($input: CreateEventInput!) {
+                    createEvent(input: $input) { id eventDate description }
+                }`,
+                variables: { 
+                    input: {
+                        eventTypeId: "1",
+                        description: "Nuevo Evento",
+                        eventDate: new Date().toISOString()
+                    }
+                },
+                description: "Crear un nuevo evento"
+            }
+        ];
+        
+        // DOM elements
+        const testsList = document.getElementById('testsList');
+        const resultsContent = document.getElementById('resultsContent');
+        const emptyState = document.getElementById('emptyState');
+        const runAllBtn = document.getElementById('runAllBtn');
+        const runSelectedBtn = document.getElementById('runSelectedBtn');
+        const clearResultsBtn = document.getElementById('clearResultsBtn');
+        const successCountEl = document.getElementById('successCount');
+        const warningCountEl = document.getElementById('warningCount');
+        const errorCountEl = document.getElementById('errorCount');
+        const queryEditor = document.getElementById('queryEditor');
+        const variablesEditor = document.getElementById('variablesEditor');
+        const runCustomQueryBtn = document.getElementById('runCustomQueryBtn');
+        const clearEditorBtn = document.getElementById('clearEditorBtn');
+        const formatQueryBtn = document.getElementById('formatQueryBtn');
+        const saveQueryBtn = document.getElementById('saveQueryBtn');
+        const editorView = document.getElementById('editorView');
+        const resultsView = document.getElementById('resultsView');
+        
+        // State
+        let testResults = [];
+        let successCount = 0;
+        let warningCount = 0;
+        let errorCount = 0;
+        let totalTests = 0;
+        let savedQueries = [];
+        
+        // Initialize the tests list
+        function initTestsList() {
+            testsList.innerHTML = '';
+            
+            tests.forEach((test, index) => {
+                const testItem = document.createElement('div');
+                testItem.className = 'test-item';
+                testItem.dataset.index = index;
+                testItem.innerHTML = `
+                    <i class="fas ${test.type === 'query' ? 'fa-search' : 'fa-edit'}"></i>
+                    <div>
+                        <div><strong>${test.name}</strong></div>
+                        <div class="test-description">${test.description}</div>
+                    </div>
+                    <span class="query-type">${test.type}</span>
+                `;
+                
+                testItem.addEventListener('click', () => {
+                    document.querySelectorAll('.test-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    testItem.classList.add('active');
+                    
+                    // Load test into editor
+                    queryEditor.value = test.query;
+                    
+                    if (test.variables) {
+                        variablesEditor.value = JSON.stringify(test.variables, null, 2);
+                    } else {
+                        variablesEditor.value = "{}";
+                    }
+                });
+                
+                testsList.appendChild(testItem);
+            });
+        }
+        
+        // Run a GraphQL query
+        async function runGraphQLQuery(query, variables = {}) {
+            try {
+                const startTime = performance.now();
+                
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        query: query,
+                        variables: variables
+                    })
+                });
+                
+                const result = await response.json();
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                let status = 'success';
+                let statusClass = 'status-success';
+                let icon = 'fa-check-circle';
+                
+                if (result.errors) {
+                    status = 'error';
+                    statusClass = 'status-error';
+                    icon = 'fa-times-circle';
+                    errorCount++;
+                } else if (!result.data || Object.keys(result.data).length === 0) {
+                    status = 'warning';
+                    statusClass = 'status-warning';
+                    icon = 'fa-exclamation-circle';
+                    warningCount++;
+                } else {
+                    successCount++;
+                }
+                
+                return {
+                    name: "Consulta Personalizada",
+                    description: "Consulta ejecutada desde el editor",
+                    type: "custom",
+                    status,
+                    statusClass,
+                    icon,
+                    duration,
+                    query: query,
+                    variables: Object.keys(variables).length > 0 ? JSON.stringify(variables, null, 2) : null,
+                    result: result,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+            } catch (error) {
+                errorCount++;
+                return {
+                    name: "Consulta Personalizada",
+                    description: "Consulta ejecutada desde el editor",
+                    type: "custom",
+                    status: 'error',
+                    statusClass: 'status-error',
+                    icon: 'fa-times-circle',
+                    duration: 0,
+                    query: query,
+                    variables: Object.keys(variables).length > 0 ? JSON.stringify(variables, null, 2) : null,
+                    result: { error: error.message },
+                    timestamp: new Date().toLocaleTimeString()
+                };
+            }
+        }
+        
+        // Run a test from the tests array
+        async function runTest(test) {
+            return runGraphQLQuery(test.query, test.variables || {});
+        }
+        
+        // Display test results
+        function displayResults() {
+            const resultsContainer = resultsView.querySelector('#resultsContainer') || document.createElement('div');
+            resultsContainer.id = 'resultsContainer';
+            resultsContainer.innerHTML = '';
+            
+            if (testResults.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            testResults.forEach(result => {
+                const resultEl = document.createElement('div');
+                resultEl.className = 'test-result';
+                
+                resultEl.innerHTML = `
+                    <div class="test-title">
+                        <i class="fas ${result.icon} ${result.statusClass}"></i>
+                        <strong>${result.name}</strong>
+                        <span class="status-badge ${result.statusClass}">${result.status}</span>
+                        <span style="margin-left: auto;">${result.duration}ms</span>
+                        <small>${result.timestamp}</small>
+                    </div>
+                    <div><em>${result.description}</em></div>
+                    <div class="query-display">${result.query}</div>
+                    ${result.variables ? `
+                        <div><strong>Variables:</strong></div>
+                        <div class="result-display">${result.variables}</div>
+                    ` : ''}
+                    <div><strong>Resultado:</strong></div>
+                    <div class="result-display">${JSON.stringify(result.result, null, 2)}</div>
+                `;
+                
+                resultsContainer.appendChild(resultEl);
+            });
+            
+            resultsView.appendChild(resultsContainer);
+            
+            // Scroll to the bottom of results
+            resultsContainer.scrollTop = resultsContainer.scrollHeight;
+            
+            // Update summary
+            successCountEl.textContent = successCount;
+            warningCountEl.textContent = warningCount;
+            errorCountEl.textContent = errorCount;
+        }
+        
+        // Run all tests
+        async function runAllTests() {
+            // Reset counters
+            testResults = [];
+            successCount = 0;
+            warningCount = 0;
+            errorCount = 0;
+            totalTests = tests.length;
+            
+            // Show progress bar
+            const resultsContainer = resultsView.querySelector('#resultsContainer') || document.createElement('div');
+            resultsContainer.id = 'resultsContainer';
+            resultsContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h3>Ejecutando ${totalTests} pruebas...</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div style="margin-top: 10px;" id="progressText">0/${totalTests}</div>
+                </div>
+            `;
+            
+            resultsView.innerHTML = '';
+            resultsView.appendChild(resultsContainer);
+            emptyState.classList.add('hidden');
+            showResultsView();
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            for (let i = 0; i < tests.length; i++) {
+                const result = await runTest(tests[i]);
+                testResults.push(result);
+                
+                // Update progress
+                const progress = Math.round(((i + 1) / totalTests) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${i + 1}/${totalTests} pruebas completadas`;
+                
+                // Update results display
+                displayResults();
+            }
+        }
+        
+        // Run selected tests
+        async function runSelectedTests() {
+            const selectedItems = document.querySelectorAll('.test-item.active');
+            
+            if (selectedItems.length === 0) {
+                alert('Por favor selecciona al menos un método para probar');
+                return;
+            }
+            
+            // Reset counters
+            testResults = [];
+            successCount = 0;
+            warningCount = 0;
+            errorCount = 0;
+            totalTests = selectedItems.length;
+            
+            // Show progress bar
+            const resultsContainer = resultsView.querySelector('#resultsContainer') || document.createElement('div');
+            resultsContainer.id = 'resultsContainer';
+            resultsContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h3>Ejecutando ${totalTests} pruebas...</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div style="margin-top: 10px;" id="progressText">0/${totalTests}</div>
+                </div>
+            `;
+            
+            resultsView.innerHTML = '';
+            resultsView.appendChild(resultsContainer);
+            emptyState.classList.add('hidden');
+            showResultsView();
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            for (let i = 0; i < selectedItems.length; i++) {
+                const index = parseInt(selectedItems[i].dataset.index);
+                const result = await runTest(tests[index]);
+                testResults.push(result);
+                
+                // Update progress
+                const progress = Math.round(((i + 1) / totalTests) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${i + 1}/${totalTests} pruebas completadas`;
+                
+                // Update results display
+                displayResults();
+            }
+        }
+        
+        // Run custom query from editor
+        async function runCustomQuery() {
+            const query = queryEditor.value;
+            let variables = {};
+            
+            try {
+                // Try to parse variables if provided
+                const variablesText = variablesEditor.value.trim();
+                if (variablesText) {
+                    // Remove comments for JSON parsing
+                    const cleanedVariables = variablesText.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '');
+                    variables = JSON.parse(cleanedVariables);
+                }
+            } catch (e) {
+                alert(`Error en las variables: ${e.message}`);
+                return;
+            }
+            
+            // Reset counters for this execution
+            testResults = [];
+            successCount = 0;
+            warningCount = 0;
+            errorCount = 0;
+            
+            // Show loading indicator
+            const resultsContainer = resultsView.querySelector('#resultsContainer') || document.createElement('div');
+            resultsContainer.id = 'resultsContainer';
+            resultsContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h3><i class="fas fa-spinner fa-spin"></i> Ejecutando consulta...</h3>
+                </div>
+            `;
+            
+            resultsView.innerHTML = '';
+            resultsView.appendChild(resultsContainer);
+            emptyState.classList.add('hidden');
+            showResultsView();
+            
+            const result = await runGraphQLQuery(query, variables);
+            testResults.push(result);
+            
+            // Update results display
+            displayResults();
+        }
+        
+        // Clear all results
+        function clearResults() {
+            testResults = [];
+            successCount = 0;
+            warningCount = 0;
+            errorCount = 0;
+            successCountEl.textContent = '0';
+            warningCountEl.textContent = '0';
+            errorCountEl.textContent = '0';
+            
+            const resultsContainer = resultsView.querySelector('#resultsContainer');
+            if (resultsContainer) resultsContainer.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            
+            // Deselect all tests
+            document.querySelectorAll('.test-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+        
+        // Clear editor
+        function clearEditor() {
+            if (confirm('¿Estás seguro de que quieres limpiar el editor?')) {
+                queryEditor.value = '';
+                variablesEditor.value = '';
+            }
+        }
+        
+        // Format query
+        function formatQuery() {
+            try {
+                // Simple formatting - just indent
+                const query = queryEditor.value;
+                const formatted = formatGraphQLQuery(query);
+                queryEditor.value = formatted;
+            } catch (e) {
+                alert(`Error formateando la consulta: ${e.message}`);
+            }
+        }
+        
+        // Simple GraphQL query formatter
+        function formatGraphQLQuery(query) {
+            let indentLevel = 0;
+            let result = '';
+            let inString = false;
+            let escapeNext = false;
+            
+            for (const char of query) {
+                if (escapeNext) {
+                    result += char;
+                    escapeNext = false;
+                    continue;
+                }
+                
+                if (char === '\\') {
+                    escapeNext = true;
+                    result += char;
+                    continue;
+                }
+                
+                if (char === '"' || char === "'") {
+                    inString = !inString;
+                    result += char;
+                    continue;
+                }
+                
+                if (!inString) {
+                    if (char === '{' || char === '[') {
+                        indentLevel++;
+                        result += char + '\n' + '  '.repeat(indentLevel);
+                        continue;
+                    }
+                    
+                    if (char === '}' || char === ']') {
+                        indentLevel = Math.max(0, indentLevel - 1);
+                        result = result.trimEnd();
+                        result += '\n' + '  '.repeat(indentLevel) + char;
+                        continue;
+                    }
+                    
+                    if (char === ',') {
+                        result += char + '\n' + '  '.repeat(indentLevel);
+                        continue;
+                    }
+                    
+                    if (char === ':') {
+                        result += ': ';
+                        continue;
+                    }
+                }
+                
+                result += char;
+            }
+            
+            return result;
+        }
+        
+        // Save current query
+        function saveQuery() {
+            const name = prompt("Nombre para esta consulta:", "Consulta Personalizada");
+            if (!name) return;
+            
+            let variables = {};
+            try {
+                const variablesText = variablesEditor.value.trim();
+                if (variablesText) {
+                    const cleanedVariables = variablesText.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '');
+                    variables = cleanedVariables ? JSON.parse(cleanedVariables) : {};
+                }
+            } catch (e) {
+                alert(`Error en las variables: ${e.message}. No se guardarán variables.`);
+            }
+            
+            const newQuery = {
+                name: name,
+                type: "custom",
+                query: queryEditor.value,
+                variables: variables,
+                description: "Consulta personalizada guardada"
+            };
+            
+            tests.push(newQuery);
+            initTestsList();
+            alert(`Consulta "${name}" guardada con éxito!`);
+        }
+        
+        // Show editor view
+        function showEditorView() {
+            editorView.classList.remove('hidden');
+            resultsView.classList.add('hidden');
+            document.querySelector('[data-tab="editor"]').classList.add('active');
+            document.querySelector('[data-tab="results"]').classList.remove('active');
+        }
+        
+        // Show results view
+        function showResultsView() {
+            editorView.classList.add('hidden');
+            resultsView.classList.remove('hidden');
+            document.querySelector('[data-tab="results"]').classList.add('active');
+            document.querySelector('[data-tab="editor"]').classList.remove('active');
+        }
+        
+        // Event listeners
+        runAllBtn.addEventListener('click', runAllTests);
+        runSelectedBtn.addEventListener('click', runSelectedTests);
+        clearResultsBtn.addEventListener('click', clearResults);
+        runCustomQueryBtn.addEventListener('click', runCustomQuery);
+        clearEditorBtn.addEventListener('click', clearEditor);
+        formatQueryBtn.addEventListener('click', formatQuery);
+        saveQueryBtn.addEventListener('click', saveQuery);
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                if (tab.dataset.tab === 'editor') {
+                    showEditorView();
+                } else {
+                    showResultsView();
+                }
+            });
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTestsList();
+            
+            // Set some default content in the editor
+            queryEditor.value = `{
+  getAlerts {
+    id
+    title
+    active
+    createdAt
+  }
+}`;
+        });
+    </script>
+</body>
+</html>

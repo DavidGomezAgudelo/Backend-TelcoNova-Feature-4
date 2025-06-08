@@ -21,16 +21,18 @@ public class EventService {
     private EventTypeRepository eventTypeRepository;
 
     public EventModel createEvent(Long eventTypeId, String description, LocalDateTime eventDate) {
-        EventTypeModel eventType = eventTypeRepository.findById(eventTypeId)
-            .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado"));
+    EventTypeModel eventType = eventTypeRepository.findById(eventTypeId)
+        .orElseThrow(() -> new RuntimeException("EventType not found with id: " + eventTypeId));
 
-        EventModel event = new EventModel();
-        event.setEventType(eventType);
-        event.setDescription(description);
-        event.setEventDate(eventDate);
+    EventModel event = new EventModel();
+    event.setEventType(eventType);
+    event.setDescription(description);
+    event.setEventDate(eventDate);
+    
+    return eventRepository.save(event);
+}
 
-        return eventRepository.save(event);
-    }
+
 
     public List<EventModel> getEvents() {
         return eventRepository.findAll();

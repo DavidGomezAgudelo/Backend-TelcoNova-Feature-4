@@ -8,6 +8,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import com.Fabrica.TelcoNova.dto.CreateEventInput;
 import com.Fabrica.TelcoNova.model.EventModel;
 import com.Fabrica.TelcoNova.service.EventService;
 
@@ -19,15 +20,13 @@ public class EventController {
     public EventController(EventService eventService) {
         this.eventService = eventService;
     }
-    @MutationMapping
-    public EventModel createEvent(
-        @Argument Long eventTypeId,
-        @Argument String description,
-        @Argument String eventDate
-    ) {
-        LocalDateTime fecha = LocalDateTime.parse(eventDate);
-        return eventService.createEvent(eventTypeId, description, fecha);
-    }
+
+   @MutationMapping
+public EventModel createEvent(@Argument CreateEventInput input) {
+    LocalDateTime fecha = LocalDateTime.parse(input.getEventDate());
+    return eventService.createEvent(input.getEventTypeId(), input.getDescription(), fecha);
+}
+
 
     @QueryMapping 
     public List<EventModel> getEvents(){

@@ -43,11 +43,14 @@ type Event {
 type Alert {
   id: ID!
   event: Event!
-  deliveryMethod: DeliveryMethod!
-  MessageTemplate: String
+  category: String
+  title: String!
+  description: String
+  priority: Int
   active: Boolean!
   createdAt: String!
 }
+
 
 type Notification {
   id: ID!
@@ -78,17 +81,23 @@ input CreateRoleInput {
 }
 
 input CreateAlertInput {
+  title: String!
+  description: String
+  priority: Int
+  category: String
   eventId: ID!
-  deliveryMethodId: ID!
-  MessageTemplate: String!
   active: Boolean = true
 }
 
+
 input UpdateAlertInput {
-  deliveryMethodId: ID
-  MessageTemplate: String
+  title: String
+  description: String
+  priority: Int
+  category: String
   active: Boolean
 }
+
 input CreateGroupInput {
   name: String!
   users: [ID!]!
@@ -99,6 +108,13 @@ type GroupWithUsers {
   name: String!
   users: [User!]!
 }
+
+input CreateEventInput {
+  eventTypeId: ID!
+  description: String!
+  eventDate: String!
+}
+
 # --------------------------
 # Queries y Mutations 
 # --------------------------
@@ -106,21 +122,22 @@ type Query {
   getUser(id: ID!): User
   getAlerts: [Alert]
   getAlertById(id: ID!): Alert
-  getRoles: [Role]
+  getRoles: [Role] #1
   getAllGroups: [GroupModel]
   getGroupById(id: ID!): GroupModel
   getAllGroupsWithUsers: [GroupWithUsers]
-  getEvents:[Event]
+  getEvents:[Event] #1
 }
 
 type Mutation {
   
-  createUser(input: CreateUserInput!): User!
+  createUser(input: CreateUserInput!): User! #1
   createAlert(input: CreateAlertInput!): Alert!
   updateAlert(id: ID!, input: UpdateAlertInput!): Boolean!
   deleteAlert(id: ID!): Boolean!
   createRole(name: String): Role!
   createGroup(input: CreateGroupInput!): GroupModel!
   addUserToGroup(groupId: ID!, userId: ID!): GroupModel!
+  createEvent(input: CreateEventInput!): Event
 
 }
