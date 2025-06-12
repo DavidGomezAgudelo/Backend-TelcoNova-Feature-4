@@ -20,7 +20,7 @@ public class AuthController {
 
 @GetMapping("/success")
 public String showTokenPage(@RequestParam("token") String token) {
-    return """
+    String htmlTemplate = """
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -40,7 +40,7 @@ public String showTokenPage(@RequestParam("token") String token) {
             <div class="container">
                 <h1>¡Login Exitoso!</h1>
                 <p>Aquí tienes tu token JWT. Cópialo y pégalo en la herramienta de testing.</p>
-                <pre id="token">%s</pre>
+                <pre id="token">__TOKEN_PLACEHOLDER__</pre> <!-- Usamos un marcador de posición único -->
                 <button onclick="copyToken()">Copiar Token</button>
                 <p id="copy-feedback">¡Copiado!</p>
             </div>
@@ -59,6 +59,9 @@ public String showTokenPage(@RequestParam("token") String token) {
             </script>
         </body>
         </html>
-    """.formatted(token);
+    """;
+    
+    // Reemplazamos el marcador de posición con el token real
+    return htmlTemplate.replace("__TOKEN_PLACEHOLDER__", token);
 }
 }

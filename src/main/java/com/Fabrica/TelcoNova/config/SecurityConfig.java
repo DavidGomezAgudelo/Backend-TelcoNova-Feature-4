@@ -1,5 +1,7 @@
 package com.Fabrica.TelcoNova.config;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -59,8 +61,9 @@ public class SecurityConfig {
                     String name = principal.getAttribute("name");
                     UserModel user = userService.findOrCreateUser(email, name);
                     String token = jwtUtil.generateToken(email, name);
+                    String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
                     String frontendUrl = "https://backend-telconova-feature-4.onrender.com/auth/success"; 
-                    response.sendRedirect(frontendUrl + "?token=" + token);
+                    response.sendRedirect(frontendUrl + "?token=" + encodedToken);
                 })
             );
             

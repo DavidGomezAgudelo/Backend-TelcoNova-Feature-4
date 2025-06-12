@@ -37,4 +37,14 @@ public class AuthorizationService {
             throw new AccessDeniedException("Acceso denegado. No tienes permiso para ver la información de otros usuarios.");
         }
     }
+
+    public void validateIsOwnerOrAdmin(GraphQLContext context, String email) {
+        UserModel currentUser = getAuthenticatedUser(context);
+        if ("admin".equalsIgnoreCase(currentUser.getRole().getName())) {
+            return; 
+        }
+        if (!currentUser.getEmail().equals(email)) {
+            throw new AccessDeniedException("Acceso denegado. No tienes permiso para ver la información de otros usuarios.");
+        }
+    }
 }

@@ -10,40 +10,51 @@ import org.springframework.stereotype.Controller;
 import com.Fabrica.TelcoNova.dto.CreateGroupInput;
 import com.Fabrica.TelcoNova.dto.GroupWithUsersDTO;
 import com.Fabrica.TelcoNova.model.GroupModel;
+import com.Fabrica.TelcoNova.service.AuthorizationService;
 import com.Fabrica.TelcoNova.service.GroupService;
+
+import graphql.GraphQLContext;
 
 
 @Controller
 public class GroupController {
 
     private final GroupService groupService;
+    private final AuthorizationService authorizationService; 
+    
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService,AuthorizationService authorizationService) {
         this.groupService = groupService;
+        this.authorizationService=authorizationService;
     }
 
     @QueryMapping
-    public List<GroupModel> getAllGroups() {
+    public List<GroupModel> getAllGroups(GraphQLContext context) {
+        authorizationService.validateAdmin(context);
         return groupService.getAllGroups();
     }
 
     @QueryMapping
-    public GroupModel getGroupById(@Argument Long id) {
+    public GroupModel getGroupById(@Argument Long id, GraphQLContext context) {
+        authorizationService.validateAdmin(context);
         return groupService.getGroupById(id);
     }
 
     @QueryMapping
-    public List<GroupWithUsersDTO> getAllGroupsWithUsers() {
+    public List<GroupWithUsersDTO> getAllGroupsWithUsers( GraphQLContext context) {
+        authorizationService.validateAdmin(context);
         return groupService.getAllGroupsWhitUsers();
     }
 
     @MutationMapping
-    public GroupModel createGroup(@Argument CreateGroupInput input) {
+    public GroupModel createGroup(@Argument CreateGroupInput input, GraphQLContext context) {
+        authorizationService.validateAdmin(context);
         return groupService.CreateGroup(input);
     }
 
     @MutationMapping
-    public GroupModel addUserToGroup(@Argument Long groupId, @Argument Long userId) {
+    public GroupModel addUserToGroup(@Argument Long groupId, @Argument Long userId, GraphQLContext context) {
+        authorizationService.validateAdmin(context);
         return groupService.addUserToGroup(groupId, userId);
     }
 }

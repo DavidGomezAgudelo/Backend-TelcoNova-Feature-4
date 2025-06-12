@@ -26,7 +26,6 @@ public class RoleController {
 
     @QueryMapping
     public List<RoleModel> getRoles(GraphQLContext context) {
-        System.out.println(">>> RoleController: Entrando a getRoles"); // DEBUG #6
         authorizationService.getAuthenticatedUser(context);
         return roleService.getRoles();
     }
