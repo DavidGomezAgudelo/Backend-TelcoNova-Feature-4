@@ -17,9 +17,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepository; // <-- 1. AÑADIR EL CAMPO
+    private final UserRepository userRepository; 
 
-    // --- 2. ESTE ES EL CONSTRUCTOR QUE NECESITAS ACTUALIZAR ---
     public JwtTokenFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
@@ -38,7 +37,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             
             if (jwtUtil.validateToken(token)) {
                 String email = jwtUtil.getEmail(token);
-                System.out.println(">>> Filtro JWT: Token válido para el email: " + email); // DEBUG #1
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     email, null, null);
                 SecurityContextHolder.getContext().setAuthentication(auth);

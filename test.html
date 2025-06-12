@@ -424,7 +424,7 @@
         clearEditorBtn.addEventListener('click', () => { if(confirm('Limpiar editor?')) { queryEditor.value=''; variablesEditor.value=''; } });
         formatQueryBtn.addEventListener('click', () => { queryEditor.value = formatGraphQLQuery(queryEditor.value); });
         loginBtn.addEventListener('click', () => {
-            window.open('http://localhost:8080/auth/google', '_blank');
+            window.open('https://backend-telconova-feature-4.onrender.com/auth/google', '_blank');
         });
         document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => tab.dataset.tab === 'editor' ? showEditorView() : showResultsView()));
         

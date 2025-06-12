@@ -15,8 +15,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.Fabrica.TelcoNova.model.UserModel;
 import com.Fabrica.TelcoNova.repository.UserRepository;
 import com.Fabrica.TelcoNova.service.JwtUtil;
+import com.Fabrica.TelcoNova.service.UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -24,10 +26,12 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final UserService userService; 
 
-    public SecurityConfig(JwtUtil jwtUtil, UserRepository userRepository) {
+    public SecurityConfig(JwtUtil jwtUtil, UserRepository userRepository, UserService userService) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Bean
@@ -53,16 +57,14 @@ public class SecurityConfig {
                     DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
                     String email = principal.getAttribute("email");
                     String name = principal.getAttribute("name");
+                    UserModel user = userService.findOrCreateUser(email, name);
                     String token = jwtUtil.generateToken(email, name);
-                    // Importante: Redirigir a una URL que tu frontend pueda manejar
-                    // Para tu herramienta, podrías redirigir de vuelta a ella con el token
-                    String frontendUrl = "https://tu-pagina-de-testing.com"; // O la URL de tu herramienta
+                    String frontendUrl = "https://backend-telconova-feature-4.onrender.com/auth/success"; 
                     response.sendRedirect(frontendUrl + "?token=" + token);
                 })
             );
             
-        // --- ESTA ES LA LÍNEA CORREGIDA ---
-        // Ahora le pasamos también el userRepository al filtro
+    
         http.addFilterBefore(new JwtTokenFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
