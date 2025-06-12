@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.Fabrica.TelcoNova.repository.UserRepository;
 import com.Fabrica.TelcoNova.service.JwtUtil;
 
 import jakarta.servlet.FilterChain;
@@ -16,9 +17,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository; // <-- 1. AÑADIR EL CAMPO
 
-    public JwtTokenFilter(JwtUtil jwtUtil) {
+    // --- 2. ESTE ES EL CONSTRUCTOR QUE NECESITAS ACTUALIZAR ---
+    public JwtTokenFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @Override
