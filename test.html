@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL API Tester - Editor Integrado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f3f4f6;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; padding: 2rem 0; text-align: center;
+            margin-bottom: 2rem; border-radius: 0 0 10px 10px;
+            box-shadow: var(--card-shadow);
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1.1rem; max-width: 800px; margin: 0 auto; opacity: 0.9; }
+        
+        /* --- NUEVOS ESTILOS PARA LA CONFIGURACIÓN --- */
+        .config-container {
+            background-color: white; padding: 1.5rem; border-radius: 8px;
+            margin-bottom: 1.5rem; box-shadow: var(--card-shadow);
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        .config-item { display: flex; align-items: center; gap: 10px; }
+        .config-item i { color: var(--primary); font-size: 1.2rem; width: 20px; text-align: center; }
+        .config-item input[type="text"] {
+            font-family: monospace; background-color: #f1f5f9;
+            padding: 10px; border-radius: 4px; flex-grow: 1;
+            border: 1px solid #e2e8f0; font-size: 1rem;
+        }
+        .config-item input[type="text"]:focus {
+            outline: 2px solid var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        }
+        /* --- FIN DE NUEVOS ESTILOS --- */
+        
+        .controls { display: flex; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-dark); }
+        .btn-secondary { background-color: var(--secondary); color: white; }
+        .btn-secondary:hover { opacity: 0.9; }
+        .btn-outline { background-color: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background-color: var(--primary); color: white; }
+        .btn-warning { background-color: var(--warning); color: white; }
+        .btn-google { background-color: #DB4437; color: white; }
+        .btn-google:hover { background-color: #C33D2E; }
+        
+        .tests-container { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .tests-list { background-color: white; border-radius: 8px; box-shadow: var(--card-shadow); overflow: hidden; }
+        .tests-list h2 { padding: 1rem; background-color: var(--primary); color: white; margin: 0; }
+        .tests-scroll { max-height: 600px; overflow-y: auto; }
+        .test-item { padding: 12px 15px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+        .test-item:hover { background-color: #f9fafb; }
+        .test-item.active { background-color: #e0e7ff; border-left: 4px solid var(--primary); box-shadow: inset 0 0 8px rgba(79, 70, 229, 0.2); }
+        .test-item i { width: 20px; text-align: center; }
+        .test-item .query-type { font-size: 0.8rem; background-color: #e0e7ff; color: var(--primary); padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+        
+        .results-container { background-color: white; border-radius: 8px; box-shadow: var(--card-shadow); overflow: hidden; display: flex; flex-direction: column; height: 700px; }
+        .results-header { padding: 1rem; background-color: #f1f5f9; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+        .tabs { display: flex; gap: 10px; }
+        .tab { padding: 8px 15px; border-radius: 4px; cursor: pointer; background-color: #e5e7eb; font-weight: 500; }
+        .tab.active { background-color: var(--primary); color: white; }
+        .results-content { padding: 1.5rem; flex-grow: 1; overflow-y: auto; }
+        .editor-container { display: flex; flex-direction: column; height: 100%; gap: 15px; }
+        .editor-section { flex: 1; display: flex; flex-direction: column; }
+        .editor-section h3 { margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .editor { flex: 1; font-family: monospace; padding: 15px; border: 1px solid #e2e8f0; border-radius: 6px; resize: none; background-color: #1e293b; color: #f1f5f9; white-space: pre; overflow: auto; line-height: 1.5; font-size: 14px; tab-size: 2; }
+        .editor:focus { outline: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); }
+        .editor-variables { height: 150px; }
+        
+        .test-result { margin-bottom: 1.5rem; }
+        .test-title { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 1.1rem; }
+        .status-badge { padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+        .status-success { background-color: #dcfce7; color: var(--success); }
+        .status-error { background-color: #fee2e2; color: var(--error); }
+        .query-display { background-color: #1e293b; color: #f1f5f9; padding: 15px; border-radius: 6px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; overflow-x: auto; }
+        .result-display { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-top: 10px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .progress-container { height: 8px; background-color: #e5e7eb; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s ease; }
+        .test-summary { display: flex; gap: 15px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+        .summary-card { flex: 1; background-color: white; border-radius: 8px; padding: 15px; text-align: center; box-shadow: var(--card-shadow); }
+        .summary-card h3 { font-size: 1.5rem; margin-bottom: 5px; }
+        .summary-card p { color: var(--gray); }
+        .success-card { border-top: 4px solid var(--success); }
+        .warning-card { border-top: 4px solid var(--warning); }
+        .error-card { border-top: 4px solid var(--error); }
+        .hidden { display: none; }
+        .empty-state { text-align: center; padding: 2rem; color: var(--gray); }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+        .custom-query-controls { display: flex; gap: 10px; margin-top: 15px; }
+        .editor-hint { font-size: 0.85rem; color: #6b7280; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+        .editor-hint i { color: var(--primary); }
+        
+        @media (max-width: 768px) {
+            .tests-container, .test-summary { grid-template-columns: 1fr; flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-bug"></i> GraphQL API Tester</h1>
+            <p>Prueba, edita y ejecuta consultas GraphQL directamente desde tu navegador.</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- SECCIÓN DE CONFIGURACIÓN MODIFICADA -->
+        <div class="config-container">
+            <div class="config-item">
+                <i class="fas fa-server"></i>
+                <input type="text" id="endpointUrl" value="http://localhost:8080/graphql">
+            </div>
+            <div class="config-item">
+                <i class="fas fa-key"></i>
+                <input type="text" id="jwtToken" placeholder="Pega tu Token JWT (Bearer) aquí...">
+                <button id="loginBtn" class="btn btn-google">
+                    <i class="fab fa-google"></i> Iniciar Sesión
+                </button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="runAllBtn" class="btn btn-primary"><i class="fas fa-play-circle"></i> Ejecutar todas</button>
+            <button id="runSelectedBtn" class="btn btn-secondary"><i class="fas fa-play"></i> Ejecutar seleccionadas</button>
+            <button id="clearResultsBtn" class="btn btn-outline"><i class="fas fa-trash-alt"></i> Limpiar resultados</button>
+            <button id="saveQueryBtn" class="btn btn-warning"><i class="fas fa-save"></i> Guardar consulta</button>
+        </div>
+        
+        <div class="tests-container">
+            <div class="tests-list">
+                <h2><i class="fas fa-list"></i> Métodos Disponibles</h2>
+                <div class="tests-scroll" id="testsList"></div>
+            </div>
+            
+            <div class="results-container">
+                <div class="results-header">
+                    <h2><i class="fas fa-clipboard-list"></i> Editor GraphQL</h2>
+                    <div class="tabs">
+                        <div class="tab active" data-tab="editor">Editor</div>
+                        <div class="tab" data-tab="results">Resultados</div>
+                    </div>
+                </div>
+                <div class="results-content">
+                    <div id="editorView">
+                        <div class="editor-container">
+                            <div class="editor-section">
+                                <h3><i class="fas fa-code"></i> Consulta GraphQL</h3>
+                                <div class="editor-hint"><i class="fas fa-info-circle"></i> Selecciona un método o escribe tu propia consulta.</div>
+                                <textarea id="queryEditor" class="editor" spellcheck="false"></textarea>
+                            </div>
+                            <div class="editor-section">
+                                <h3><i class="fas fa-sliders-h"></i> Variables (JSON)</h3>
+                                <textarea id="variablesEditor" class="editor editor-variables" spellcheck="false"></textarea>
+                            </div>
+                            <div class="custom-query-controls">
+                                <button id="runCustomQueryBtn" class="btn btn-primary"><i class="fas fa-play"></i> Ejecutar</button>
+                                <button id="clearEditorBtn" class="btn btn-outline"><i class="fas fa-eraser"></i> Limpiar</button>
+                                <button id="formatQueryBtn" class="btn btn-outline"><i class="fas fa-align-left"></i> Formatear</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="resultsView" class="hidden">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No hay resultados aún</h3>
+                            <p>Ejecuta algunas pruebas para ver los resultados aquí.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-summary">
+            <div class="summary-card success-card"><h3 id="successCount">0</h3><p>Éxitos</p></div>
+            <div class="summary-card warning-card"><h3 id="warningCount">0</h3><p>Advertencias</p></div>
+            <div class="summary-card error-card"><h3 id="errorCount">0</h3><p>Fallos</p></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const endpointUrlInput = document.getElementById('endpointUrl');
+        const jwtTokenInput = document.getElementById('jwtToken');
+        const loginBtn = document.getElementById('loginBtn');
+        const testsList = document.getElementById('testsList');
+        const resultsContent = document.getElementById('resultsContent');
+        const emptyState = document.getElementById('emptyState');
+        const runAllBtn = document.getElementById('runAllBtn');
+        const runSelectedBtn = document.getElementById('runSelectedBtn');
+        const clearResultsBtn = document.getElementById('clearResultsBtn');
+        const successCountEl = document.getElementById('successCount');
+        const warningCountEl = document.getElementById('warningCount');
+        const errorCountEl = document.getElementById('errorCount');
+        const queryEditor = document.getElementById('queryEditor');
+        const variablesEditor = document.getElementById('variablesEditor');
+        const runCustomQueryBtn = document.getElementById('runCustomQueryBtn');
+        const clearEditorBtn = document.getElementById('clearEditorBtn');
+        const formatQueryBtn = document.getElementById('formatQueryBtn');
+        const saveQueryBtn = document.getElementById('saveQueryBtn');
+        const editorView = document.getElementById('editorView');
+        const resultsView = document.getElementById('resultsView');
+        
+        // Test definitions (igual que antes)
+        const tests = [
+            // Queries
+            { name: "getRoles", type: "query", query: `{ getRoles { id name } }`, description: "Obtener todos los roles" },
+            { name: "getAllGroups", type: "query", query: `{ getAllGroups { id name } }`, description: "Obtener todos los grupos" },
+            { name: "getEvents", type: "query", query: `{ getEvents { id eventDate description eventType { name } } }`, description: "Obtener todos los eventos" },
+            { name: "getAlerts", type: "query", query: `{ getAlerts { id title active createdAt } }`, description: "Obtener todas las alertas" },
+            { name: "getUser", type: "query", query: `query GetUser($id: ID!) { getUser(id: $id) { id name email } }`, variables: { id: "1" }, description: "Obtener usuario por ID" },
+            // Mutations
+            { name: "createRole (Admin)", type: "mutation", query: `mutation CreateRole($name: String!) { createRole(name: $name) { id name } }`, variables: { name: "Rol Creado" }, description: "Crear un nuevo rol" },
+            { name: "createUser (Admin)", type: "mutation", query: `mutation CreateUser($input: CreateUserInput!) { createUser(input: $input) { id name email } }`, variables: { input: { name: "Nuevo Usuario", email: `nuevo${Date.now()}@ejemplo.com`, phone: "123456789", roleId: "1", address: "Calle Ejemplo 123" } }, description: "Crear un nuevo usuario" },
+            { name: "createAlert (Admin)", type: "mutation", query: `mutation CreateAlert($input: CreateAlertInput!) { createAlert(input: $input) { id title active } }`, variables: { input: { title: "Nueva Alerta", description: "Descripción", priority: 1, category: "Test", eventId: "1", active: true } }, description: "Crear una nueva alerta" },
+            { name: "deleteAlert (Admin)", type: "mutation", query: `mutation DeleteAlert($id: ID!) { deleteAlert(id: $id) }`, variables: { id: "1" }, description: "Eliminar una alerta" },
+        ];
+        
+        let testResults = [];
+        let successCount = 0;
+        let warningCount = 0;
+        let errorCount = 0;
+        
+        // --- FUNCIÓN MODIFICADA PARA USAR URL Y TOKEN ---
+        async function runGraphQLQuery(query, variables = {}) {
+            const endpoint = endpointUrlInput.value;
+            const token = jwtTokenInput.value.trim();
+            const headers = { "Content-Type": "application/json" };
+            
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify({ query, variables })
+                });
+                const result = await response.json();
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                let status = result.errors ? 'error' : 'success';
+                let statusClass = result.errors ? 'status-error' : 'status-success';
+                let icon = result.errors ? 'fa-times-circle' : 'fa-check-circle';
+                
+                if (status === 'success') successCount++; else errorCount++;
+
+                return {
+                    name: "Consulta Personalizada", status, statusClass, icon, duration,
+                    query, result, timestamp: new Date().toLocaleTimeString(),
+                    variables: Object.keys(variables).length > 0 ? JSON.stringify(variables, null, 2) : null,
+                };
+            } catch (error) {
+                errorCount++;
+                return {
+                    name: "Error de Conexión", status: 'error', statusClass: 'status-error', icon: 'fa-exclamation-triangle',
+                    duration: 0, query, result: { error: error.message }, timestamp: new Date().toLocaleTimeString()
+                };
+            }
+        }
+        
+        function initTestsList() {
+            testsList.innerHTML = '';
+            tests.forEach((test, index) => {
+                const testItem = document.createElement('div');
+                testItem.className = 'test-item';
+                testItem.dataset.index = index;
+                testItem.innerHTML = `
+                    <i class="fas ${test.type === 'query' ? 'fa-search' : 'fa-edit'}"></i>
+                    <div><strong>${test.name}</strong><div class="test-description">${test.description}</div></div>
+                    <span class="query-type">${test.type}</span>`;
+                testItem.addEventListener('click', () => {
+                    document.querySelectorAll('.test-item').forEach(item => item.classList.remove('active'));
+                    testItem.classList.add('active');
+                    queryEditor.value = test.query;
+                    variablesEditor.value = test.variables ? JSON.stringify(test.variables, null, 2) : "{}";
+                    formatQuery();
+                });
+                testsList.appendChild(testItem);
+            });
+        }
+        
+        function displayResults() {
+            const resultsContainer = resultsView.querySelector('#resultsContainer') || document.createElement('div');
+            resultsContainer.id = 'resultsContainer';
+            resultsContainer.innerHTML = '';
+            if (testResults.length === 0) { emptyState.classList.remove('hidden'); return; }
+            emptyState.classList.add('hidden');
+            testResults.forEach(result => {
+                const resultEl = document.createElement('div');
+                resultEl.className = 'test-result';
+                resultEl.innerHTML = `
+                    <div class="test-title">
+                        <i class="fas ${result.icon} ${result.statusClass}"></i><strong>${result.name}</strong>
+                        <span class="status-badge ${result.statusClass}">${result.status}</span>
+                        <span style="margin-left: auto;">${result.duration}ms</span><small>${result.timestamp}</small>
+                    </div>
+                    <div class="query-display">${result.query.replace(/</g, "<")}</div>
+                    ${result.variables ? `<div><strong>Variables:</strong></div><div class="result-display">${result.variables.replace(/</g, "<")}</div>` : ''}
+                    <div><strong>Resultado:</strong></div>
+                    <div class="result-display">${JSON.stringify(result.result, null, 2).replace(/</g, "<")}</div>`;
+                resultsContainer.prepend(resultEl);
+            });
+            resultsView.innerHTML = '';
+            resultsView.appendChild(resultsContainer);
+            successCountEl.textContent = successCount;
+            warningCountEl.textContent = warningCount;
+            errorCountEl.textContent = errorCount;
+        }
+
+        async function runTests(selectedTests) {
+            if (selectedTests.length === 0) { alert('No hay pruebas seleccionadas para ejecutar.'); return; }
+            testResults = []; successCount = 0; warningCount = 0; errorCount = 0;
+            const totalTests = selectedTests.length;
+            const resultsContainer = document.createElement('div');
+            resultsContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <h3>Ejecutando ${totalTests} pruebas...</h3>
+                    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+                    <div style="margin-top: 10px;" id="progressText">0/${totalTests}</div>
+                </div>`;
+            resultsView.innerHTML = '';
+            resultsView.appendChild(resultsContainer);
+            emptyState.classList.add('hidden');
+            showResultsView();
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            for (let i = 0; i < selectedTests.length; i++) {
+                const test = selectedTests[i];
+                const result = await runGraphQLQuery(test.query, test.variables);
+                result.name = test.name;
+                result.description = test.description;
+                testResults.push(result);
+                const progress = Math.round(((i + 1) / totalTests) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${i + 1}/${totalTests} completadas`;
+            }
+            displayResults();
+        }
+        
+        async function runCustomQuery() {
+            let variables = {};
+            try {
+                const variablesText = variablesEditor.value.trim();
+                if (variablesText) {
+                    variables = JSON.parse(variablesText.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, ''));
+                }
+            } catch (e) { alert(`Error en las variables: ${e.message}`); return; }
+            testResults = []; successCount = 0; warningCount = 0; errorCount = 0;
+            showResultsView();
+            const result = await runGraphQLQuery(queryEditor.value, variables);
+            testResults.push(result);
+            displayResults();
+        }
+        
+        function clearResults() {
+            testResults = []; successCount = 0; warningCount = 0; errorCount = 0;
+            successCountEl.textContent = '0'; warningCountEl.textContent = '0'; errorCountEl.textContent = '0';
+            const resultsContainer = resultsView.querySelector('#resultsContainer');
+            if (resultsContainer) resultsContainer.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            document.querySelectorAll('.test-item').forEach(item => item.classList.remove('active'));
+        }
+        
+        function formatGraphQLQuery(query) {
+            const indent = '  '; let level = 0;
+            return query.replace(/([\{\(])|([\}\)])|([,])/g, (match, open, close, comma) => {
+                if (open) return `${open}\n${indent.repeat(++level)}`;
+                if (close) return `\n${indent.repeat(--level)}${close}`;
+                if (comma) return `${comma}\n${indent.repeat(level)}`;
+                return match;
+            }).replace(/^\s*[\r\n]/gm, '');
+        }
+        
+        function showEditorView() {
+            editorView.classList.remove('hidden'); resultsView.classList.add('hidden');
+            document.querySelector('[data-tab="editor"]').classList.add('active');
+            document.querySelector('[data-tab="results"]').classList.remove('active');
+        }
+        
+        function showResultsView() {
+            editorView.classList.add('hidden'); resultsView.classList.remove('hidden');
+            document.querySelector('[data-tab="results"]').classList.add('active');
+            document.querySelector('[data-tab="editor"]').classList.remove('active');
+        }
+        
+        // Event Listeners
+        runAllBtn.addEventListener('click', () => runTests(tests));
+        runSelectedBtn.addEventListener('click', () => {
+            const selectedIndices = [...document.querySelectorAll('.test-item.active')].map(el => parseInt(el.dataset.index));
+            runTests(selectedIndices.map(i => tests[i]));
+        });
+        clearResultsBtn.addEventListener('click', clearResults);
+        runCustomQueryBtn.addEventListener('click', runCustomQuery);
+        clearEditorBtn.addEventListener('click', () => { if(confirm('Limpiar editor?')) { queryEditor.value=''; variablesEditor.value=''; } });
+        formatQueryBtn.addEventListener('click', () => { queryEditor.value = formatGraphQLQuery(queryEditor.value); });
+        loginBtn.addEventListener('click', () => {
+            window.open('http://localhost:8080/auth/google', '_blank');
+        });
+        document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => tab.dataset.tab === 'editor' ? showEditorView() : showResultsView()));
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initTestsList();
+            queryEditor.value = "{\n  # Selecciona un método o escribe tu consulta\n}";
+            variablesEditor.value = "{\n  // Introduce tus variables aquí\n}";
+            formatQuery();
+        });
+    </script>
+</body>
+</html>

@@ -85,6 +85,7 @@ public class GroupService {
         userGroup.setGroup(group);
         userGroup.setUser(user);
         userGroupRepository.save(userGroup);
+        
         return group;
     }
 

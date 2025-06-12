@@ -8,6 +8,7 @@ import com.Fabrica.TelcoNova.model.UserModel;
 import com.Fabrica.TelcoNova.repository.RoleRepository;
 import com.Fabrica.TelcoNova.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -21,6 +22,27 @@ public class UserService {
     public UserModel getUserById(Long id) {
         return userRepository.findById(id).orElse(null);  
     }
+
+     public UserModel findOrCreateUser(String email, String name) {
+    Optional<UserModel> optionalUser = userRepository.findByEmail(email);
+    
+    if (optionalUser.isPresent()) {
+        return optionalUser.get();
+    }
+
+    UserModel user = new UserModel();
+    user.setEmail(email);
+    user.setName(name);
+
+    // Asignar rol por defecto (ej: "USER")
+    RoleModel defaultRole = roleRepository.findByName("user")
+        .orElseThrow(() -> new RuntimeException("Rol por defecto no encontrado"));
+
+    user.setRole(defaultRole);
+
+    return userRepository.save(user);
+}
+
 
      public UserModel createUser(CreateUserInput input) {
         UserModel user = new UserModel();

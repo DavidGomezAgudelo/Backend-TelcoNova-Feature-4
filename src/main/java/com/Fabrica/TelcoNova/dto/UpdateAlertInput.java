@@ -1,21 +1,43 @@
 package com.Fabrica.TelcoNova.dto;
 
 public class UpdateAlertInput {
-    private String messageTemplate;
+    private String title;
+    private String description;
+    private Integer priority;
     private Boolean active;
-    
+    private String category;
+
     public UpdateAlertInput(){}
-    public UpdateAlertInput(Boolean active, String messageTemplate) {
+    public UpdateAlertInput(Boolean active, String category, String description, Integer priority, String title) {
         this.active = active;
-        this.messageTemplate = messageTemplate;
+        this.category = category;
+        this.description = description;
+        this.priority = priority;
+        this.title = title;
     }
 
-    public String getMessageTemplate() {
-        return messageTemplate;
+    public String getTitle() {
+        return title;
     }
 
-    public void setMessageTemplate(String messageTemplate) {
-        this.messageTemplate = messageTemplate;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Integer priority) {
+        this.priority = priority;
     }
 
     public Boolean getActive() {
@@ -26,4 +48,15 @@ public class UpdateAlertInput {
         this.active = active;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+    
+
+
 }
+

@@ -7,24 +7,30 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "usuarios_grupos")
+@Table(
+    name = "user_groups",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "group_id"})
+    }
+)
 public class UserGroupModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Nueva clave primaria simple
+    private Long id; 
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "user_id")
     private UserModel user;
 
     @ManyToOne
-    @JoinColumn(name = "grupo_id")
+    @JoinColumn(name = "group_id")
     private GroupModel group;
 
-    // Constructor, getters y setters
+ 
 
     public UserGroupModel() {
     }
