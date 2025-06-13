@@ -9,6 +9,5 @@ import com.Fabrica.TelcoNova.model.EventTypeModel;
 
 @Repository
 public interface EventTypeRepository extends JpaRepository<EventTypeModel, Long> {
-
     Optional<EventTypeModel> findByName(String Name);
 }

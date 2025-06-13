@@ -1,5 +1,7 @@
 package com.Fabrica.TelcoNova.controller;
 
+import java.util.List;
+
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -27,6 +29,12 @@ public class UserController {
     public UserModel getUser(@Argument Long id,GraphQLContext context) {
         authorizationService.validateIsOwnerOrAdmin(context,id);
         return userService.getUserById(id);
+    }
+
+    @QueryMapping 
+    public List<UserModel> getAllUsers(GraphQLContext context) {
+        authorizationService.validateAdmin(context);
+        return userService.getAllUsers();
     }
 
     @MutationMapping

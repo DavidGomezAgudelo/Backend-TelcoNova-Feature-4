@@ -20,9 +20,9 @@ name: String!
 }
 type User {
 id: ID!
-name: String!
+name: String
 email: String!
-phone: String!
+phone: String
 role: Role
 address: String
 createdAt: String
@@ -43,13 +43,23 @@ priority: Int
 active: Boolean!
 createdAt: String!
 }
-type Notification {
-id: ID!
-alert: Alert!
-scheduledDate: String!
-status: DeliveryStatus!
-createdAt: String!
+
+type NotificationTarget {
+  group: GroupModel!
+  deliveryMethod: DeliveryMethod!
+  deliveryStatus: DeliveryStatus!
+  sentAt: String
+  NotificationId: ID!
 }
+
+type Notification {
+  id: ID!
+  alert: Alert!
+  scheduledDate: String!
+  createdAt: String!
+  targets: [NotificationTarget!]!
+}
+
 type GroupModel {
 id:ID!
 name: String!
@@ -97,10 +107,18 @@ eventTypeId: ID!
 description: String!
 eventDate: String!
 }
+
+input SendNotificationInput {
+  alertId: ID!
+  groupIds: [ID!]!
+  deliveryMethodIds: [ID!]!
+  scheduledDate: String 
+}
 #--------------------------
 #Queries y Mutations
 #--------------------------
 type Query {
+getUsers: [User]
 getUser(id: ID!): User
 getAlerts: [Alert]
 getAlertById(id: ID!): Alert
@@ -108,15 +126,27 @@ getRoles: [Role] #1
 getAllGroups: [GroupModel]
 getGroupById(id: ID!): GroupModel
 getAllGroupsWithUsers: [GroupWithUsers]
-getEvents:[Event] #1
+getEvents:[Event] 
+getEventTypes: [EventType]
+getDeliveryMethods: [DeliveryMethod]
+getDeliveryStatuses: [DeliveryStatus]
+getNotifications: [Notification]
+getNotificationById(id: ID!): Notification
+
 }
+
 type Mutation {
-createUser(input: CreateUserInput!): User! #1
+createUser(input: CreateUserInput!): User! 
 createAlert(input: CreateAlertInput!): Alert!
 updateAlert(id: ID!, input: UpdateAlertInput!): Boolean!
 deleteAlert(id: ID!): Boolean!
 createRole(name: String): Role!
 createGroup(input: CreateGroupInput!): GroupModel!
-addUserToGroup(groupId: ID!, userId: ID!): GroupModel!
+addUserToGroup(groupId: ID!, userId: ID!): GroupModel
 createEvent(input: CreateEventInput!): Event
+sendNotification(input: SendNotificationInput!): Notification!
+
+updateGroup(id: ID!, name: String!): GroupModel!
+removeUserFromGroup(groupId: ID!, userId: ID!): GroupModel
+
 }

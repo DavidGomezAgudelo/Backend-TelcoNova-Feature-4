@@ -16,6 +16,8 @@ import com.Fabrica.TelcoNova.repository.GroupRepository;
 import com.Fabrica.TelcoNova.repository.UserGroupRepository;
 import com.Fabrica.TelcoNova.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 
 @Service
 public class GroupService {
@@ -51,7 +53,8 @@ public class GroupService {
     }
 
     public GroupModel getGroupById(Long id) {
-        return groupRepository.findById(id).orElse(null);
+        return groupRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + id));
     }
 
     public List<GroupWithUsersDTO> getAllGroupsWhitUsers() {
@@ -89,5 +92,22 @@ public class GroupService {
         return group;
     }
 
+    
 
+    public GroupModel updateGroup(Long groupId, String newName) {
+        GroupModel group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + groupId));
+        group.setName(newName);
+        return groupRepository.save(group);
+    }
+
+   
+    public GroupModel removeUserFromGroup(Long groupId, Long userId) {
+        userGroupRepository.deleteByGroupIdAndUserId( groupId ,  userId);
+
+        GroupModel group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + groupId));
+        
+        return group;
+    }
 }

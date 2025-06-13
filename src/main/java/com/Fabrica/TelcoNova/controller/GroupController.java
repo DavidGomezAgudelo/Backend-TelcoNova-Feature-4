@@ -57,4 +57,18 @@ public class GroupController {
         authorizationService.validateAdmin(context);
         return groupService.addUserToGroup(groupId, userId);
     }
+
+
+    @MutationMapping
+    public GroupModel updateGroup(@Argument Long id, @Argument String name, GraphQLContext context) {
+        authorizationService.validateAdmin(context);
+        return groupService.updateGroup(id, name);
+    }
+
+    @MutationMapping
+    public GroupModel removeUserFromGroup(@Argument Long groupId, @Argument Long userId, GraphQLContext context) {
+        authorizationService.validateAdmin(context);
+        return groupService.removeUserFromGroup(groupId, userId);
+    }
+
 }

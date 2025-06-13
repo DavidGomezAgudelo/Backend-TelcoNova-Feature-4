@@ -1,4 +1,8 @@
 package com.Fabrica.TelcoNova.service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -7,8 +11,6 @@ import com.Fabrica.TelcoNova.model.RoleModel;
 import com.Fabrica.TelcoNova.model.UserModel;
 import com.Fabrica.TelcoNova.repository.RoleRepository;
 import com.Fabrica.TelcoNova.repository.UserRepository;
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -21,6 +23,10 @@ public class UserService {
 
     public UserModel getUserById(Long id) {
         return userRepository.findById(id).orElse(null);  
+    }
+
+    public  List<UserModel> getAllUsers(){
+        return userRepository.findAll();
     }
 
      public UserModel findOrCreateUser(String email, String name) {

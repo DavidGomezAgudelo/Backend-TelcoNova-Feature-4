@@ -228,19 +228,38 @@
         const resultsView = document.getElementById('resultsView');
         
         // Test definitions (igual que antes)
-        const tests = [
-            // Queries
-            { name: "getRoles", type: "query", query: `{ getRoles { id name } }`, description: "Obtener todos los roles" },
-            { name: "getAllGroups", type: "query", query: `{ getAllGroups { id name } }`, description: "Obtener todos los grupos" },
-            { name: "getEvents", type: "query", query: `{ getEvents { id eventDate description eventType { name } } }`, description: "Obtener todos los eventos" },
-            { name: "getAlerts", type: "query", query: `{ getAlerts { id title active createdAt } }`, description: "Obtener todas las alertas" },
-            { name: "getUser", type: "query", query: `query GetUser($id: ID!) { getUser(id: $id) { id name email } }`, variables: { id: "1" }, description: "Obtener usuario por ID" },
-            // Mutations
-            { name: "createRole (Admin)", type: "mutation", query: `mutation CreateRole($name: String!) { createRole(name: $name) { id name } }`, variables: { name: "Rol Creado" }, description: "Crear un nuevo rol" },
-            { name: "createUser (Admin)", type: "mutation", query: `mutation CreateUser($input: CreateUserInput!) { createUser(input: $input) { id name email } }`, variables: { input: { name: "Nuevo Usuario", email: `nuevo${Date.now()}@ejemplo.com`, phone: "123456789", roleId: "1", address: "Calle Ejemplo 123" } }, description: "Crear un nuevo usuario" },
-            { name: "createAlert (Admin)", type: "mutation", query: `mutation CreateAlert($input: CreateAlertInput!) { createAlert(input: $input) { id title active } }`, variables: { input: { title: "Nueva Alerta", description: "Descripción", priority: 1, category: "Test", eventId: "1", active: true } }, description: "Crear una nueva alerta" },
-            { name: "deleteAlert (Admin)", type: "mutation", query: `mutation DeleteAlert($id: ID!) { deleteAlert(id: $id) }`, variables: { id: "1" }, description: "Eliminar una alerta" },
-        ];
+         const tests = [
+    // Queries
+    { name: "getRoles", type: "query", query: `{ getRoles { id name } }`, description: "Obtener todos los roles" },
+    { name: "getAllGroups (Admin) ", type: "query", query: `{ getAllGroups { id name } }`, description: "Obtener todos los grupos" },
+    { name: "getEvents (Admin)", type: "query", query: `{ getEvents { id eventDate description eventType { name } } }`, description: "Obtener todos los eventos" },
+    { name: "getAlerts (Admin)", type: "query", query: `{ getAlerts { id title active createdAt } }`, description: "Obtener todas las alertas" },
+    { name: "getUser (Owner/admin)", type: "query", query: `query GetUser($id: ID!) { getUser(id: $id) { id name email } }`, variables: { id: "1" }, description: "Obtener usuario por ID" },
+    { name: "getUsers (Admin)", type: "query", query: `{ getUsers { id name email } }`, description: "Obtener todos los usuarios" },
+    { name: "getAlertById (Admin)", type: "query", query: `query ($id: ID!) { getAlertById(id: $id) { id title description priority } }`, variables: { id: "1" }, description: "Obtener una alerta por ID" },
+    { name: "getGroupById (Admin)", type: "query", query: `query ($id: ID!) { getGroupById(id: $id) { id name  } }`, variables: { id: "1" }, description: "Obtener grupo por ID" },
+    { name: "getAllGroupsWithUsers (Admin)", type: "query", query: `{ getAllGroupsWithUsers { id name users { id name } } }`, description: "Obtener todos los grupos con usuarios" },
+    { name: "getEventTypes (Admin)", type: "query", query: `{ getEventTypes { id name priorityLevel } }`, description: "Obtener tipos de evento" },
+    { name: "getDeliveryMethods ", type: "query", query: `{ getDeliveryMethods { id name } }`, description: "Obtener métodos de entrega" },
+    { name: "getDeliveryStatuses ", type: "query", query: `{ getDeliveryStatuses { id name } }`, description: "Obtener estados de entrega" },
+    { name: "getNotifications (Admin)", type: "query", query: `{ getNotifications { id scheduledDate createdAt alert { title } } }`, description: "Obtener notificaciones" },
+    { name: "getNotificationById (Admin)", type: "query", query: `query ($id: ID!) { getNotificationById(id: $id) { id alert { title } targets { group { name }, deliveryMethod { name } } } }`, variables: { id: "1" }, description: "Obtener notificación por ID" },
+
+    // Mutations
+      { name: "createRole (Admin)", type: "mutation", query: `mutation CreateRole($name: String!) { createRole(name: $name) { id name } }`, variables: { name: "Rol Creado" }, description: "Crear un nuevo rol" },
+    { name: "createUser (Admin)", type: "mutation", query: `mutation CreateUser($input: CreateUserInput!) { createUser(input: $input) { id name email } }`, variables: { input: { name: "Nuevo Usuario", email: `nuevo${Date.now()}@ejemplo.com`, phone: "123456789", roleId: "1", address: "Calle Ejemplo 123" } }, description: "Crear un nuevo usuario" },
+    { name: "createAlert (Admin)", type: "mutation", query: `mutation CreateAlert($input: CreateAlertInput!) { createAlert(input: $input) { id title active } }`, variables: { input: { title: "Nueva Alerta", description: "Descripción", priority: 1, category: "Test", eventId: "1", active: true } }, description: "Crear una nueva alerta" },
+    { name: "deleteAlert (Admin)", type: "mutation", query: `mutation DeleteAlert($id: ID!) { deleteAlert(id: $id) }`, variables: { id: "1" }, description: "Eliminar una alerta" },
+    { name: "updateAlert (Admin)", type: "mutation", query: `mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!) { updateAlert(id: $id, input: $input) }`, variables: { id: "1", input: { title: "Alerta Actualizada", active: false } }, description: "Actualizar una alerta" },
+    { name: "createGroup (Admin)", type: "mutation", query: `mutation ($input: CreateGroupInput!) { createGroup(input: $input) { id name } }`, variables: { input: { name: "Grupo Test", users: ["1", "2"] } }, description: "Crear un nuevo grupo con usuarios" },
+    { name: "addUserToGroup (Admin)", type: "mutation", query: `mutation ($groupId: ID!, $userId: ID!) { addUserToGroup(groupId: $groupId, userId: $userId) { id name } }`, variables: { groupId: "1", userId: "3" }, description: "Agregar usuario a grupo" },
+  
+    { name: "removeUserFromGroup  (Admin)", type: "mutation", query: `mutation ($groupId: ID!, $userId: ID!) { removeUserFromGroup(groupId: $groupId, userId: $userId) { id name } }`, variables: { groupId: "1", userId: "3" }, description: "Eliminar usuario de grupo" },
+    { name: "updateGroup (Admin)", type: "mutation", query: `mutation ($id: ID!, $name: String!) { updateGroup(id: $id, name: $name) { id name } }`, variables: { id: "1", name: "Grupo Actualizado" }, description: "Actualizar nombre del grupo" },
+    { name: "createEvent (Admin)", type: "mutation", query: `mutation ($input: CreateEventInput!) { createEvent(input: $input) { id eventDate description } }`, variables: { input: { eventTypeId: "1", description: "Evento de prueba", eventDate: "2025-06-20T00:00:00" } }, description: "Crear evento" },
+    { name: "sendNotification (Admin)", type: "mutation", query: `mutation ($input: SendNotificationInput!) { sendNotification(input: $input) { id scheduledDate alert { title } } }`, variables: { input: { alertId: "4", groupIds: ["1"], deliveryMethodIds: ["1"], scheduledDate: "2025-06-25T15:00:00" } }, description: "Enviar notificación" },
+
+  ];
         
         let testResults = [];
         let successCount = 0;
