@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.Fabrica.TelcoNova.config.RabbitMQConfig;
 import com.Fabrica.TelcoNova.dto.SendNotificationInput;
 import com.Fabrica.TelcoNova.model.AlertModel;
 import com.Fabrica.TelcoNova.model.DeliveryMethodModel;
@@ -21,9 +22,15 @@ import com.Fabrica.TelcoNova.repository.DeliveryStatusRepository;
 import com.Fabrica.TelcoNova.repository.GroupRepository;
 import com.Fabrica.TelcoNova.repository.NotificationRepository;
 import com.Fabrica.TelcoNova.repository.NotificationTargetRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @Service
 public class NotificationService {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private AlertRepository alertRepository;
@@ -37,6 +44,12 @@ public class NotificationService {
     public NotificationModel sendNotification(SendNotificationInput input) {
         AlertModel alert = alertRepository.findById(input.getAlertId())
                 .orElseThrow(() -> new IllegalArgumentException("Alerta no encontrada con ID: " + input.getAlertId()));
+        
+        // Asumimos que tienes un método para buscar el método de entrega "EMAIL"
+        // Podrías cachearlo para mejor rendimiento.
+        DeliveryMethodModel emailMethod = deliveryMethodRepository.findByName("EMAIL")
+                .orElseThrow(() -> new IllegalStateException("Método de entrega 'EMAIL' no encontrado."));
+
         DeliveryStatusModel initialStatus = deliveryStatusRepository.findByName("PENDING");
           
         NotificationModel notification = new NotificationModel();
@@ -72,7 +85,18 @@ public class NotificationService {
             targets.add(target);
         }
         
-        notificationTargetRepository.saveAll(targets);
+        // Guardamos todos los targets en la base de datos
+        List<NotificationTargetModel> savedTargets = notificationTargetRepository.saveAll(targets);
+
+        // Ahora, publicamos los mensajes en la cola
+        for (NotificationTargetModel target : savedTargets) {
+            // Solo encolamos si el método de entrega es EMAIL
+            if (target.getDeliveryMethod().getId().equals(emailMethod.getId())) {
+                System.out.println("Encolando notificación de email para target ID: " + target.getId());
+                // Enviamos solo el ID. El consumidor se encargará de buscar los detalles.
+                rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, target.getId());
+            }
+        }
 
         return savedNotification;
     }

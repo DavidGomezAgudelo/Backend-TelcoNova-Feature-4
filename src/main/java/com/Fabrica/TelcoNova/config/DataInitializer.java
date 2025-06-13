@@ -24,6 +24,7 @@ import com.Fabrica.TelcoNova.repository.EventRepository;
 import com.Fabrica.TelcoNova.repository.EventTypeRepository;
 import com.Fabrica.TelcoNova.repository.RoleRepository;
 import com.Fabrica.TelcoNova.repository.UserRepository;
+import com.Fabrica.TelcoNova.service.EmailService;
 
 import jakarta.transaction.Transactional;
 
@@ -37,6 +38,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final DataSource dataSource;  // Inyectamos DataSource
+    private final EmailService emailService;
 
     @Autowired
     public DataInitializer(RoleRepository roleRepository,
@@ -45,7 +47,7 @@ public class DataInitializer implements CommandLineRunner {
                           DeliveryStatusRepository deliveryStatusRepository,
                           UserRepository userRepository,
                           EventRepository eventRepository,
-                          DataSource dataSource) {  // Añadimos DataSource
+                          DataSource dataSource, EmailService emailService) {  // Añadimos DataSource
         this.roleRepository = roleRepository;
         this.eventTypeRepository = eventTypeRepository;
         this.deliveryMethodRepository = deliveryMethodRepository;
@@ -53,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.dataSource = dataSource;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -71,6 +74,7 @@ public class DataInitializer implements CommandLineRunner {
                 System.err.println("⛔ No se pudo inicializar datos. Verifique la conexión a BD y tablas");
             }
             } else {
+
                 System.out.println("No se inicializarán datos");
             }
         } catch (Exception e) {

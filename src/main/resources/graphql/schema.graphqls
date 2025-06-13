@@ -118,7 +118,7 @@ input SendNotificationInput {
 #Queries y Mutations
 #--------------------------
 type Query {
-getUsers: [User]
+getAllUsers: [User]
 getUser(id: ID!): User
 getAlerts: [Alert]
 getAlertById(id: ID!): Alert
